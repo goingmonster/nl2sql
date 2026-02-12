@@ -1,0 +1,1 @@
+import{r}from"./index-DefhRm7t.js";function n(t){return r({url:"/user-prompt-config/",method:"get",params:t})}function u(t){return r({url:"/user-prompt-config/",method:"post",data:t})}function p(t,o){return r({url:`/user-prompt-config/${t}`,method:"put",data:o})}function i(t){return r({url:`/user-prompt-config/${t}`,method:"delete"})}export{u as c,i as d,n as g,p as u};

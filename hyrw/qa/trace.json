@@ -1,0 +1,248 @@
+[
+  {
+  "question": "2025年12月06日从台湾起飞的公务机有哪些? 请返回相关飞机的ICAO号",
+  "sql": "select\n    distinct aircraft_icao\nfrom\n    dws_aircraft_flight_line_tmp\nwhere\nday_key ='2025-12-06'\nand departure_port_country_code ='TW'\nand aircraft_type = 19",
+  "where_conditions": [
+    {
+      "field": "day_key",
+      "operator": "eq",
+      "value": "2025-12-06",
+      "description": "日期筛选 - 2025年12月6日"
+    },
+    {
+      "field": "departure_port_country_code",
+      "operator": "eq",
+      "value": "TW",
+      "description": "出发地国家/地区代码 - 台湾"
+    },
+    {
+      "field": "aircraft_type",
+      "operator": "eq",
+      "value": 19,
+      "description": "飞机类型 - 公务机"
+    }
+  ]
+},
+  {
+    "question": "2025年12月06日全球有多少架C-17飞行,合计飞行了多少架次",
+    "sql": "select\n   count(distinct aircraft_icao),\n   count(1)\nfrom\n    dws_aircraft_flight_line_tmp\nwhere\nday_key ='2025-12-06'\nand aircraft_model like '%C-17%'",
+    "where_conditions": [
+      {
+        "field": "day_key",
+        "operator": "eq",
+        "value": "2025-12-06",
+        "description": "日期筛选 - 2025年12月6日"
+      },
+      {
+        "field": "aircraft_model",
+        "operator": "like",
+        "value": "%C-17%",
+        "description": "飞机型号模糊匹配 - C-17运输机"
+      }
+    ]
+  },
+  {
+    "question": "2025年12月06日日本有哪些型号的军事类型飞机飞行,分别飞行了多少架次",
+    "sql": "select\n    aircraft_model,count(1) as cnt\nfrom\n    dws_aircraft_flight_line_tmp\nwhere\nday_key ='2025-12-06'\nand country_code ='JP'\nand mil_civ_nature =0\ngroup by aircraft_model\norder by cnt desc",
+    "where_conditions": [
+      {
+        "field": "day_key",
+        "operator": "eq",
+        "value": "2025-12-06",
+        "description": "日期筛选 - 2025年12月6日"
+      },
+      {
+        "field": "country_code",
+        "operator": "eq",
+        "value": "JP",
+        "description": "国家/地区代码 - 日本"
+      },
+      {
+        "field": "mil_civ_nature",
+        "operator": "eq",
+        "value": 0,
+        "description": "军民属性 - 军用飞机"
+      }
+    ]
+  },
+  {
+    "question": "2025年12月06日 中日两国往来的飞机有多少架次",
+    "sql": "select\n    count(1)\nfrom\n    comm.dws_aircraft_flight_line_tmp\nwhere\n    day_key ='2025-12-06'\n    and\n    (\n       (departure_port_country_code='CN' and arrival_port_country_code ='JP')\n        or ((departure_port_country_code='JP' and arrival_port_country_code ='CN'))\n    )",
+    "where_conditions": [
+      {
+        "field": "day_key",
+        "operator": "eq",
+        "value": "2025-12-06",
+        "description": "日期筛选 - 2025年12月6日"
+      },
+      {
+        "field": "departure_port_country_code, arrival_port_country_code",
+        "operator": "or_condition",
+        "value": "('CN','JP') or ('JP','CN')",
+        "description": "中日两国之间往来的航班"
+      }
+    ]
+  },
+  {
+    "question": "2025年12月06日 有多少架 RC-135系列飞机飞行",
+    "sql": "select\n    count(distinct  aircraft_icao)\nfrom\n    comm.dws_aircraft_flight_line_tmp\nwhere\n    day_key ='2025-12-06'\n    and aircraft_model like '%RC-135%'",
+    "where_conditions": [
+      {
+        "field": "day_key",
+        "operator": "eq",
+        "value": "2025-12-06",
+        "description": "日期筛选 - 2025年12月6日"
+      },
+      {
+        "field": "aircraft_model",
+        "operator": "like",
+        "value": "%RC-135%",
+        "description": "飞机型号模糊匹配 - RC-135系列侦察机"
+      }
+    ]
+  },
+  {
+    "question": "ICAO号为AE01D8的飞机 最新位置在哪里",
+    "sql": "select\n    aircraft_icao,\n    longitude,\n    latitude,\n    toTimeZone(toDateTime(pos_datetime),'Asia/Shanghai')\nfrom\n    comm.pos_aircraft_path_tmp\nwhere\n    day_key >= '2025-12-05'\n    and  aircraft_icao ='AE01D8'\norder by pos_datetime desc\nlimit 1\n",
+    "where_conditions": [
+      {
+        "field": "day_key",
+        "operator": "gte",
+        "value": "2025-12-05",
+        "description": "日期范围 - 2025年12月5日及以后"
+      },
+      {
+        "field": "aircraft_icao",
+        "operator": "eq",
+        "value": "AE01D8",
+        "description": "ICAO航空器代码 - AE01D8"
+      }
+    ]
+  },
+  {
+    "question": "ICAO号为AE01D8的飞机 最近一个月,都从哪些机场起降",
+    "sql": "select\n'出发机场统计' as `tjlb`,\ndeparture_port_icao as `ICAO`,\ncount(1) as `pc`\nfrom\n    comm.dws_aircraft_flight_line_tmp\nwhere\n    day_key >=toString(today()-30)\n    and  aircraft_icao ='AE01D8'\ngroup by departure_port_icao\nunion all\nselect\n'降落机场统计' as `tjlb`,\narrival_port_icao as `ICAO`,\ncount(1) as `pc`\nfrom\n    comm.dws_aircraft_flight_line_tmp\nwhere\n    day_key >=toString(today()-30)\n    and  aircraft_icao ='AE01D8'\ngroup by arrival_port_icao",
+    "where_conditions": [
+      {
+        "field": "day_key",
+        "operator": "dynamic_date",
+        "value": "toString(today()-30)",
+        "description": "动态日期范围 - 最近30天"
+      },
+      {
+        "field": "aircraft_icao",
+        "operator": "eq",
+        "value": "AE01D8",
+        "description": "ICAO航空器代码 - AE01D8"
+      }
+    ]
+  },
+  {
+    "question": "2025年12月15日从大兴机场起飞的飞机降落在哪个机场的最多",
+    "sql": "select\n    arrival_port_name_chi,\n    count(1) as cnt\nfrom\n    comm.dws_aircraft_flight_line_tmp\nwhere\n    day_key ='2025-12-15'\n    and departure_port_name_chi like '%首都国际机场%'\n    and track_point_cnt > 10\ngroup by arrival_port_name_chi\norder by  cnt desc\nlimit 1\n",
+    "where_conditions": [
+      {
+        "field": "day_key",
+        "operator": "eq",
+        "value": "2025-12-15",
+        "description": "日期筛选 - 2025年12月15日"
+      },
+      {
+        "field": "departure_port_name_chi",
+        "operator": "like",
+        "value": "%首都国际机场%",
+        "description": "出发机场名称模糊匹配 - 包含首都国际机场"
+      },
+      {
+        "field": "track_point_cnt",
+        "operator": "gt",
+        "value": 10,
+        "description": "航班轨迹点数量 - 大于10个点"
+      }
+    ]
+  },
+  {
+    "question": "2025年12月15日从中国本土起飞的飞机 目的地前三的海外国家地区",
+    "sql": "select\n    arrival_port_country_code,\n    count(1) as cnt\nfrom\n    comm.dws_aircraft_flight_line_tmp\nwhere\n    day_key ='2025-12-15'\n    and departure_port_country_code = 'CN'\n    and arrival_port_country_code != 'CN'\ngroup by arrival_port_country_code\norder by  cnt desc\nlimit 3",
+    "where_conditions": [
+      {
+        "field": "day_key",
+        "operator": "eq",
+        "value": "2025-12-15",
+        "description": "日期筛选 - 2025年12月15日"
+      },
+      {
+        "field": "departure_port_country_code",
+        "operator": "eq",
+        "value": "CN",
+        "description": "出发地国家代码 - 中国"
+      },
+      {
+        "field": "arrival_port_country_code",
+        "operator": "neq",
+        "value": "CN",
+        "description": "目地地国家代码 - 非中国(海外)"
+      }
+    ]
+  },
+  {
+    "question": "2025年12月15日起飞美国军机最多的五个日本机场",
+    "sql": "select\n    departure_port_name_chi,\n    count(1) cnt\nfrom\n    comm.dws_aircraft_flight_line_tmp\nwhere\n    day_key ='2025-12-15'\n    and country_code ='US'\n    and mil_civ_nature = 0\n    and departure_port_country_code ='JP'\ngroup by departure_port_name_chi\norder by cnt  desc\nlimit 5",
+    "where_conditions": [
+      {
+        "field": "day_key",
+        "operator": "eq",
+        "value": "2025-12-15",
+        "description": "日期筛选 - 2025年12月15日"
+      },
+      {
+        "field": "country_code",
+        "operator": "eq",
+        "value": "US",
+        "description": "飞机注册所属国 - 美国"
+      },
+      {
+        "field": "mil_civ_nature",
+        "operator": "eq",
+        "value": 0,
+        "description": "军民属性 - 军用飞机"
+      },
+      {
+        "field": "departure_port_country_code",
+        "operator": "eq",
+        "value": "JP",
+        "description": "出发地国家代码 - 日本"
+      }
+    ]
+  },
+  {
+    "question": "2025年12月15日起降过的国家(地区)数量最多的中国大陆的飞机是哪些",
+    "sql": "select\n    *\nfrom\n(\nselect\n    aircraft_icao,\n    aircraft_model,\n    country_code,\n    arrayDistinct(arrayConcat(cc_d,cc_a)) as `起降的国家列表`,\n    length(arrayDistinct(arrayConcat(cc_d,cc_a))) as cc_cnt,\n    rank() over(  order by cc_cnt desc ) as ra\nfrom\n    (\n    select\n    aircraft_icao,\n    aircraft_model,\n    country_code,\n    groupArray(departure_port_country_code) as cc_d,\n    groupArray(arrival_port_country_code) as cc_a\n    from\n        comm.dws_aircraft_flight_line_tmp\n    where\n        day_key ='2025-12-15'\n        and country_code ='CN'\n        and departure_port_country_code !=''\n        and arrival_port_country_code !=''\n    group by  aircraft_icao,aircraft_model,country_code\n    )\n)\nwhere ra = 1",
+    "where_conditions": [
+      {
+        "field": "day_key",
+        "operator": "eq",
+        "value": "2025-12-15",
+        "description": "日期筛选 - 2025年12月15日"
+      },
+      {
+        "field": "country_code",
+        "operator": "eq",
+        "value": "CN",
+        "description": "飞机注册所属国 - 中国"
+      },
+      {
+        "field": "departure_port_country_code",
+        "operator": "neq",
+        "value": "",
+        "description": "出发地国家代码 - 非空"
+      },
+      {
+        "field": "arrival_port_country_code",
+        "operator": "neq",
+        "value": "",
+        "description": "目的地国家代码 - 非空"
+      }
+    ]
+  }
+]

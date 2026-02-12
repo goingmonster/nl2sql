@@ -1,0 +1,77 @@
+[
+  {
+    "question": "目前掌握的各类型人物有多少？",
+    "sql": "select\n    person_type,\n    count(1) as cnt\nfrom\nppl_people\n    group by person_type\norder by  cnt desc"
+  },
+  {
+    "question": "目前掌握台湾多少人",
+    "sql": "select\n    count(1)\nfrom\nppl_people\nwhere\n    country_code ='TW'"
+  },
+  {
+    "question": "台北的军人掌握多少",
+    "sql": "SELECT COUNT(1)\nFROM ppl_people\nWHERE\n    person_type LIKE '%军%'\n    AND adm_name_1 like '%台北%'"
+  },
+  {
+    "question": "台湾六军团指挥部掌握多少人",
+    "sql": "SELECT\n    COUNT(DISTINCT id)\nFROM\n    ppl_troop_rank\nWHERE\n    (troop3 LIKE '%六军团%' OR troop3 LIKE '%6军团%' OR troop3 LIKE '%第六军团%')\n    AND country_code = 'TW'"
+  },
+  {
+    "question": "当前掌握的人物数据中每个国家有多少人",
+    "sql": "select\n    country_code,\n    count(1) as cnt\nfrom\n    ppl_people\ngroup by country_code\norder by cnt desc;"
+  },
+  {
+    "question": "请给我在国家安全局任职的张元斌的所有信息",
+    "sql": "select\n    *\nfrom\n    ppl_people\nwhere\n    name = '张元斌'\n  AND  id in (\n      select id from ppl_job where organization like '%国家安全局%'\n    )"
+  },
+  {
+    "question": "请给我曾在海军司令部任职的唐华的基础信息",
+    "sql": "SELECT p.id, p.name, p.name_traditional, p.gender, p.date_of_birth, p.nationality,\n p.country_code, p.adm_name_1, p.adm_name_2, p.address, p.telephone, p.person_type\nFROM ppl_people p\nJOIN\n (SELECT id\n FROM ppl_troop_rank\n WHERE (name LIKE '%唐华%'\n OR name LIKE '%唐華%')\n AND (troop3 LIKE '%海军司令部%'\n OR troop3 LIKE '%海軍司令部%')) t ON p.id = t.id"
+  },
+  {
+    "question": "43炮指部 掌握多少人\n",
+    "sql": "SELECT COUNT(DISTINCT id)\nFROM ppl_troop_rank\nWHERE \n    (troop3 LIKE '%43炮指部%' OR troop3 LIKE '%43炮兵指挥部%' OR troop3 LIKE '%第四十三炮兵指挥部%') \n  AND country_code = 'TW'"
+  },
+  {
+    "question": "你当前掌握的桃园市、台北市、台南市的人分别有多少人",
+    "sql": "SELECT adm_name_1, COUNT(1) AS count\nFROM ppl_people\nWHERE adm_name_1 IN ('桃园市', '台北市', '台南市')\nGROUP BY adm_name_1\nORDER BY adm_name_1"
+  },
+  {
+    "question": "你当前掌握的桃园市、台北市、台南市的人各个区县各个类别的人分别有多少人\n",
+    "sql": "SELECT adm_name_1, adm_name_2,COUNT(1) AS count\nFROM ppl_people\nWHERE adm_name_1 IN ('桃园市', '台北市', '台南市')\nGROUP BY adm_name_1,adm_name_2\nORDER BY adm_name_1"
+  },
+  {
+    "question": "542装甲旅我们掌握多少人 请给出10个人的基础信息\n",
+    "sql": "select\n    *\nfrom\n    ppl_people\nwhere id in \n      (\n    select\n        distinct id\n    FROM\n        ppl_troop_rank\n    WHERE\n        (troop3 LIKE '%542%' or  troop3 LIKE '%五四二%' )\n        AND troop3 LIKE '%装甲旅%'\n    limit 10\n    )"
+  },
+  {
+    "question": "请给584旅的黄煜庭的所有信息\n",
+    "sql": "select\n    *\nfrom\n    ppl_people\nwhere id in (\nselect\n    distinct id\nFROM\n    ppl_troop_rank\nWHERE\n    troop3 LIKE '%584%' AND troop3 LIKE '%装甲旅%'  and name like '黄煜庭'\n                    )"
+  },
+  {
+    "question": "曾在584旅 担任过营长的人有哪些",
+    "sql": "select\n    id,\n    name\nfrom\n    ppl_people\nwhere id in (\nselect\n    distinct id\nFROM\n    ppl_troop_rank\nWHERE\n    troop3 LIKE '%584%' AND troop3 LIKE '%旅%'  and title like '%营长%'\n                    )"
+  },
+  {
+    "question": "曾在海军军官学校上学,现在在海军司令部任职的人有哪些?",
+    "sql": "with pe as (select id\n            from ppl_education\n            where organization like '%海军军官学校%'),\npt as (\nselect\n    id\nfrom\n    ppl_troop_rank\nwhere\n    troop3 like '%海军司令部%'\n)\nselect\nid ,name\nfrom\nppl_people\nwhere\nid in (select id from pe)\nand id in (select id from pt)"
+  },
+  {
+    "question": "在国家安全局工作的张元斌的同事有哪些",
+    "sql": "with tmp as\n(\n    select id\n    from ppl_people\n    where name = '张元斌'\n    AND id in (select id from ppl_job where organization like '%国家安全局%')\n    )\n    select id,\n       name\nfrom ppl_people\nwhere id in\n      (select distinct id\n             from ppl_job\n             where organization in (select organization\n                                    from ppl_job\n                                    where id in (select id from tmp))\n    ) and id not in  (select id from tmp)"
+  },
+  {
+    "question": "542装甲旅有哪些人家庭住址在台北的",
+    "sql": "select\n    *\nfrom\n    ppl_people\nwhere\n    id in\n    (\n    select\n        distinct id\n    FROM\n        ppl_troop_rank\n    WHERE\n        (troop3 LIKE '%542%' or  troop3 LIKE '%五四二%' )\n        AND troop3 LIKE '%装甲旅%'\n    )\n    and (address like '%台北%' or address like '%臺北%' )"
+  },
+  {
+    "question": "曾在陆军军官学校上学,现在在陆军司令部任职的人有多少?",
+    "sql": "with pe as (select id\n            from ppl_education\n            where organization like '%陆军军官学校%'),\npt as (\nselect\n    id\nfrom\n    ppl_troop_rank\nwhere\n    troop3 like '%陆军司令部%'\n)\nselect\ncount(1)\nfrom\nppl_people\nwhere\nid in (select id from pe)\nand id in (select id from pt)"
+  },{
+    "question": "历任542旅旅长教育经历有哪些",
+    "sql": "with tmp as\n(\nselect\n    distinct  id\nfrom\n    ppl_troop_rank\nWHERE\n    (troop3 LIKE '%542%' or  troop3 LIKE '%五四二%' )\n    AND troop3 LIKE '%装甲旅%'\n    and title like '%旅长%'\n        )\nselect\n   pp.name as name,\n   pe.organization as organization\nfrom\n    (\nselect\nid,name\nfrom\n    ppl_people\nwhere\n     id in tmp\n    ) as pp\nleft join\n    (\nselect\n    id ,organization\nfrom\n    ppl_education\nwhere\n    id in  tmp\ngroup by  id ,organization\n    ) as pe\non\n    pp.id = pe.id"
+  },
+  {
+    "question": "有没有人即在584旅服役过,也在542旅服役过 ",
+    "sql": "select\n    *\nfrom\n    ppl_people\nwhere  id in (\nselect\n    t1.id\nfrom\n    (\nselect\n    distinct  id\nfrom\n    ppl_troop_rank\nWHERE\n    (troop3 LIKE '%542%' or  troop3 LIKE '%五四二%' )\n    AND troop3 LIKE '%旅%'\n    ) as  t1\njoin (\nselect\n    distinct  id\nfrom\n    ppl_troop_rank\nWHERE\n    (troop3 LIKE '%584%' or  troop3 LIKE '%五八四%' )\n    AND troop3 LIKE '%旅%'\n    ) as t2\non t1.id =t2.id\n    )"
+  }
+]

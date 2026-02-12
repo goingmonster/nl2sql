@@ -1,0 +1,1 @@
+import{r as n}from"./index-DefhRm7t.js";function l(t){return n({url:"/nlsql-task-config/",method:"get",params:t})}function o(t){return n({url:"/nlsql-task-config/",method:"post",data:t})}function r(t,s){return n({url:`/nlsql-task-config/${t}`,method:"put",data:s})}function u(t){return n({url:`/nlsql-task-config/${t}`,method:"delete"})}export{o as c,u as d,l as g,r as u};

@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  nlsql-allinone:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: nlsql-allinone
+    ports:
+      - "8080:80"
+    restart: unless-stopped

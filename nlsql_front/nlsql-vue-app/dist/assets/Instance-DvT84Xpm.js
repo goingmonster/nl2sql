@@ -1,0 +1,1 @@
+import{_ as a,c,a as e,o as t}from"./index-CPm_9BR3.js";const n={},o={class:"page"};function r(l,s){return t(),c("div",o,[...s[0]||(s[0]=[e("div",{class:"card"},[e("h2",{class:"card-title"},"Instance"),e("p",null,"功能开发中...")],-1)])])}const _=a(n,[["render",r]]);export{_ as default};
